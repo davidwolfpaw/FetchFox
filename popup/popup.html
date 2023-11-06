@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>FetchFox</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        * {
+            margin: 0;
+        }
+
+        body {
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            width: 100%;
+            overflow: visible;
+        }
+
+        button {
+            background-color: #f8f9fa;
+            border: 1px solid #3c4043;
+            border-radius: 4px;
+            color: #3c4043;
+            padding: 0.5em;
+            text-align: center;
+        }
+
+        button:hover {
+            border-color: #dadce0;
+            box-shadow: rgba(0, 0, 0, .1) 0 1px 1px;
+            color: #202124;
+        }
+
+        button:focus {
+            border-color: #4285f4;
+            outline: none;
+        }
+
+        table {
+            width: auto;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .wrapper {
+            height: 100%;
+            width: 100%;
+            min-width: 400px;
+            min-height: 200px;
+            padding: 20px;
+        }
+
+        .action-buttons {
+            margin-bottom: 20px;
+        }
+
+        .metadata-table-wrapper {
+            width: 100%;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="action-buttons">
+            <button id="save-metadata">Save Metadata</button>
+            <button id="view-metadata">View Saved Metadata</button>
+        </div>
+        <div class="metadata-table-wrapper">
+            <table id="metadata-table" style="display:none;">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Title</th>
+                        <th>URL</th>
+                        <th>Image</th>
+                        <th>Author</th>
+                        <th>Canonical URL</th>
+                        <th>Publish Date</th>
+                    </tr>
+                </thead>
+                <tbody id="metadata-body">
+                    <!-- Metadata rows will go here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+
+</html>
