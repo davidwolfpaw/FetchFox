@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Clear existing table rows
             metadataBody.innerHTML = '';
+
             metadata.forEach((meta, index) => {
                 const row = metadataBody.insertRow();
 
@@ -63,6 +64,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 row.insertCell().textContent = meta.author || 'No author';
                 row.insertCell().textContent = meta.canonical || 'No canonical URL';
                 row.insertCell().textContent = meta.publishDate || 'No publish date';
+
+                // Set drag and drop attributes
+                row.setAttribute('draggable', true);
+                row.setAttribute('class', 'draggable');
+                row.setAttribute('data-index', index);
+
+                // Add drag and drop event listeners
+                row.addEventListener('dragstart', handleDragStart, false);
+                row.addEventListener('dragenter', handleDragEnter, false);
+                row.addEventListener('dragover', handleDragOver, false);
+                row.addEventListener('dragleave', handleDragLeave, false);
+                row.addEventListener('drop', handleDrop, false);
+                row.addEventListener('dragend', handleDragEnd, false);
+
+                metadataBody.appendChild(row);
             });
 
             // Show the table
@@ -74,4 +90,114 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Update the viewButton event listener to use buildTable
     viewButton.addEventListener('click', buildTable);
+
+    // This will store the node that we are dragging.
+    let dragSrcEl = null;
+
+    function handleDragStart(e) {
+        this.classList.add('dragging');
+        dragSrcEl = this;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+
+        // Add the over class to all rows except the one being dragged
+        let rows = Array.from(document.querySelectorAll('.draggable'));
+        rows.forEach(row => {
+            if (row !== dragSrcEl) {
+                row.classList.add('over');
+            }
+        });
+    }
+
+    function handleDragOver(e) {
+        if (e.preventDefault) {
+            // Allows us to drop.
+            e.preventDefault();
+        }
+
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+    }
+
+    function handleDragEnter(e) {
+        this.classList.add('over');
+    }
+
+    function handleDragLeave(e) {
+        this.classList.remove('over');
+    }
+
+    function handleDrop(e) {
+        if (e.stopPropagation) {
+            e.stopPropagation(); // Stops the browser from redirecting.
+        }
+
+        // Perform the action only if the dragged element is different from the target
+        if (dragSrcEl !== this) {
+            // Perform the data swap here
+            let rows = Array.from(document.querySelectorAll('.draggable'));
+            let fromIndex = dragSrcEl.getAttribute('data-index');
+            let toIndex = this.getAttribute('data-index');
+            rows[fromIndex].outerHTML = this.outerHTML;
+            rows[toIndex].outerHTML = dragSrcEl.outerHTML;
+
+            // Update the storage with the new order
+            updateStorageOrder(parseInt(fromIndex, 10), parseInt(toIndex, 10));
+        }
+
+        if (dragSrcEl != this) {
+            // Swap the HTML of the dragged row and the row over which it's dropped
+            dragSrcEl.innerHTML = this.innerHTML;
+            this.innerHTML = e.dataTransfer.getData('text/html');
+
+            // Update the indexes and the storage to reflect the new order
+            updateIndexesAndStorage();
+        }
+
+        return false;
+    }
+
+    function handleDragEnd(e) {
+        // Remove the styles from the drag source and all other rows
+        let rows = Array.from(document.querySelectorAll('.draggable'));
+        rows.forEach(row => {
+            row.classList.remove('over', 'dragging');
+        });
+    }
+
+    function updateIndexesAndStorage() {
+        let rows = document.querySelectorAll('.metadata-row');
+        let newMetadataArray = [];
+
+        rows.forEach((row, newIndex) => {
+            let index = row.dataset.index;
+            // Update the index attribute
+            row.dataset.index = newIndex.toString();
+
+            // Retrieve and update the metadata array based on the new index
+            browser.storage.local.get('allMetadata', (data) => {
+                newMetadataArray[newIndex] = data.allMetadata[index];
+
+                // When we're done with all the rows, update the local storage
+                if (newIndex === rows.length - 1) {
+                    browser.storage.local.set({ 'allMetadata': newMetadataArray });
+                }
+            });
+        });
+    }
+
+    // Call this function after the drop to update the order in the storage.
+    function updateStorageOrder(fromIndex, toIndex) {
+        browser.storage.local.get('allMetadata').then(data => {
+            let metadata = data.allMetadata || [];
+            // Extract the item from the original position and insert it into the new position
+            metadata.splice(toIndex, 0, metadata.splice(fromIndex, 1)[0]);
+            // Update the storage with the new order
+            browser.storage.local.set({ 'allMetadata': metadata }).then(() => {
+                // Rebuild the table to reflect the new order
+                buildTable();
+            });
+        });
+    }
+
 });
