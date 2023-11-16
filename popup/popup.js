@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 row.insertCell().innerHTML = meta.image ? `<img src="${meta.image}" alt="Image" style="width:100px;">` : 'No image';
                 row.insertCell().textContent = meta.author || 'No author';
                 row.insertCell().textContent = meta.canonical || 'No canonical URL';
-                row.insertCell().textContent = meta.publishDate || 'No publish date';
+                row.insertCell().textContent = formatDate(meta.publishDate) || 'No publish date';
 
                 // Set drag and drop attributes
                 row.setAttribute('draggable', true);
@@ -198,6 +198,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 buildTable();
             });
         });
+    }
+
+    // Update the timestamp to be more human readable
+    function formatDate(timestamp) {
+        // Create a date object from the timestamp
+        const date = new Date(timestamp);
+
+        // Options for toLocaleDateString()
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+
+        // Format the date with the specified options
+        return date.toLocaleDateString('en-US', options);
     }
 
 });

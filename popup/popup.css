@@ -1,0 +1,96 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+}
+
+body {
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    width: 100%;
+    overflow: visible;
+}
+
+[draggable] {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    /* Required to make an element draggable */
+    cursor: move;
+}
+
+.dragOver {
+    border: dashed 2px #000;
+}
+
+/* Styles for the draggable rows */
+tr.draggable {
+    cursor: move;
+}
+
+/* Style to apply to the row being dragged */
+tr.dragging {
+    opacity: 0.5;
+}
+
+/* Style to apply to potential drop targets */
+tr.over {
+    border-bottom: 2px solid #009688;
+}
+
+button {
+    background-color: #f8f9fa;
+    border: 1px solid #3c4043;
+    border-radius: 4px;
+    color: #3c4043;
+    padding: 0.5em;
+    text-align: center;
+}
+
+button:hover {
+    border-color: #dadce0;
+    box-shadow: rgba(0, 0, 0, .1) 0 1px 1px;
+    color: #202124;
+}
+
+button:focus {
+    border-color: #4285f4;
+    outline: none;
+}
+
+table {
+    width: auto;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+.wrapper {
+    height: 100%;
+    width: 100%;
+    min-width: 400px;
+    min-height: 200px;
+    padding: 20px;
+}
+
+.action-buttons {
+    margin-bottom: 20px;
+}
+
+.metadata-table-wrapper {
+    width: 100%;
+    display: inline-block;
+}
