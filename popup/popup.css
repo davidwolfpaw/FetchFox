@@ -64,22 +64,6 @@ body {
     color: #721c24;
 }
 
-#clear-metadata {
-    /* Styles for the 'Clear All Data' button */
-    background-color: #ff6666;
-    /* Red background */
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    margin-top: 10px;
-    cursor: pointer;
-}
-
-#clear-metadata:hover {
-    background-color: #ff4d4d;
-    /* Darker red on hover */
-}
-
 /* Drag and Drop Feature */
 [draggable] {
     -moz-user-select: none;
@@ -110,27 +94,54 @@ tr.over {
 
 /* Buttons */
 button {
-    background-color: #f8f9fa;
-    border: 1px solid #3c4043;
-    border-radius: 4px;
-    color: #3c4043;
-    padding: 0.5em;
+    background-color: #007BFF;
+    color: white;
+    font-size: 1rem;
+    border: 2px solid transparent;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 5px;
     text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 }
 
 button:hover {
-    border-color: #dadce0;
-    box-shadow: rgba(0, 0, 0, .1) 0 1px 1px;
-    color: #202124;
+    background-color: #0056b3;
+}
+
+button:active {
+    background-color: #004085;
+    border-color: #002752;
 }
 
 button:focus {
-    border-color: #4285f4;
-    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
+}
+
+button:focus-visible {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
 }
 
 .action-buttons {
     margin-bottom: 20px;
+}
+
+#export-metadata {
+    background-color: #4CAF50;
+}
+
+#export-metadata:hover {
+    background-color: #45a049;
+}
+
+#clear-metadata {
+    background-color: #ff6666;
+}
+
+#clear-metadata:hover {
+    background-color: #ff4d4d;
 }
 
 /* Tables */

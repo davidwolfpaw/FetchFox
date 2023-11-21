@@ -113,14 +113,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Add delete button cell
                 const deleteCell = row.insertCell();
                 const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'x';
+                deleteButton.textContent = '\u{2716}';
                 deleteButton.addEventListener('click', () => deleteMetadata(index));
                 deleteCell.appendChild(deleteButton);
 
                 // Insert metadata into table
                 row.insertCell().textContent = meta.title || 'No title';
                 row.insertCell().textContent = meta.url || 'No URL';
-                row.insertCell().innerHTML = meta.image ? `<img src="${meta.image}" alt="Image" style="width:100px;">` : 'No image';
                 row.insertCell().textContent = meta.author || 'No author';
                 row.insertCell().textContent = meta.canonical || 'No canonical URL';
                 row.insertCell().textContent = formatDate(meta.publishDate) || 'No publish date';
