@@ -64,6 +64,22 @@ body {
     color: #721c24;
 }
 
+#clear-metadata {
+    /* Styles for the 'Clear All Data' button */
+    background-color: #ff6666;
+    /* Red background */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+#clear-metadata:hover {
+    background-color: #ff4d4d;
+    /* Darker red on hover */
+}
+
 /* Drag and Drop Feature */
 [draggable] {
     -moz-user-select: none;

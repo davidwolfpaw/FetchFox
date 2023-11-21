@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const viewButton = document.getElementById('view-metadata');
     const metadataTable = document.getElementById('metadata-table');
     const metadataBody = document.getElementById('metadata-body');
+    const clearButton = document.getElementById('clear-metadata');
 
     // Handle saving of the metadata on click of save button
     saveButton.addEventListener('click', function () {
@@ -42,6 +43,20 @@ document.addEventListener('DOMContentLoaded', function () {
         buildTable();
         // Display table
         metadataTable.style.display = 'table';
+        // Show the Clear All Data button
+        clearButton.style.display = 'block';
+    });
+
+    clearButton.addEventListener('click', function () {
+        if (confirm('Are you sure that you want to clear all saved metadata?')) {
+            browser.storage.local.set({ 'allMetadata': [] }).then(() => {
+                showMessage('All metadata cleared', 'success');
+                // Rebuild or refresh the table
+                buildTable();
+            }).catch(error => {
+                showMessage('Error clearing metadata: ' + error, 'error');
+            });
+        }
     });
 
     function deleteMetadata(index) {
@@ -106,6 +121,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Show the table
             metadataTable.style.display = 'table';
+            // If there is no metadata, hide the Clear All Data button
+            clearButton.style.display = metadata.length === 0 ? 'none' : 'block';
         }).catch(error => {
             alert('Error retrieving metadata: ' + error);
         });
