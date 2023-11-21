@@ -124,10 +124,6 @@ button:focus-visible {
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
 }
 
-.action-buttons {
-    margin-bottom: 20px;
-}
-
 #export-metadata {
     background-color: #4CAF50;
 }
@@ -146,19 +142,31 @@ button:focus-visible {
 
 /* Tables */
 table {
-    width: auto;
+    width: 100%;
     border-collapse: collapse;
-}
-
-th,
-td {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
+    margin: 15px 0;
+    min-width: 400px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
 }
 
 th {
+    background-color: #007bff;
+    color: white;
+    text-align: left;
+    padding: 5px 10px;
+}
+
+td {
+    padding: 5px 10px;
+    border-bottom: 1px solid #dddddd;
+}
+
+tr:nth-child(even) {
     background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #ddd;
 }
 
 /* Layout */
@@ -166,7 +174,7 @@ th {
     height: 100%;
     width: 100%;
     min-width: 400px;
-    min-height: 200px;
+    /* min-height: 100px; */
     padding: 20px;
 }
 

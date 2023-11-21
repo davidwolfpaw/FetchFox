@@ -121,7 +121,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 row.insertCell().textContent = meta.title || 'No title';
                 row.insertCell().textContent = meta.url || 'No URL';
                 row.insertCell().textContent = meta.author || 'No author';
-                row.insertCell().textContent = meta.canonical || 'No canonical URL';
                 row.insertCell().textContent = formatDate(meta.publishDate) || 'No publish date';
 
                 // Set drag and drop attributes
