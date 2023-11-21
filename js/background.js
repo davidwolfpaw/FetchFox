@@ -75,10 +75,10 @@ function extractMetadata() {
         ], window.location.href),
 
         author: () => findContentBySelectors([
-            'meta[name="author"]', 'meta[property="book:author"]',
             'meta[property="article:author"]', 'meta[name="article:author"]',
             'meta[property="parsely-author"]', 'meta[name="parsely-author"]',
             'a[class*="author" i]', '[rel="author"]',
+            'meta[name="author"]', 'meta[property="book:author"]',
             'meta[property="twitter:creator"]', 'meta[name="twitter:creator"]',
             'meta[property="profile:username"]', 'meta[name="profile:username"]',
             '[itemprop="author"]', '.wp-block-post-author__name'
