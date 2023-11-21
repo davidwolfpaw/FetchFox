@@ -80,7 +80,8 @@ function extractMetadata() {
             'meta[property="parsely-author"]', 'meta[name="parsely-author"]',
             'a[class*="author" i]', '[rel="author"]',
             'meta[property="twitter:creator"]', 'meta[name="twitter:creator"]',
-            'meta[property="profile:username"]', 'meta[name="profile:username"]'
+            'meta[property="profile:username"]', 'meta[name="profile:username"]',
+            '[itemprop="author"]'
         ], 'No author'),
 
         image: () => findContentBySelectors([
