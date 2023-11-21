@@ -81,7 +81,7 @@ function extractMetadata() {
             'a[class*="author" i]', '[rel="author"]',
             'meta[property="twitter:creator"]', 'meta[name="twitter:creator"]',
             'meta[property="profile:username"]', 'meta[name="profile:username"]',
-            '[itemprop="author"]'
+            '[itemprop="author"]', '.wp-block-post-author__name'
         ], 'No author'),
 
         image: () => findContentBySelectors([
