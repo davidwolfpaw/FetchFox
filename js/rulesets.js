@@ -221,3 +221,15 @@ function extractMetadata() {
     }
     return metadata;
 }
+
+// // Export the extractMetadata function
+// if (typeof module !== 'undefined' && module.exports) {
+//     module.exports = { extractMetadata };
+// }
+
+// Listen for a message from the background script
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "extractMetadata") {
+        sendResponse(extractMetadata());
+    }
+});
