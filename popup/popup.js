@@ -4,14 +4,37 @@ document.addEventListener('DOMContentLoaded', function () {
     const metadataTable = document.getElementById('metadata-table');
     const metadataBody = document.getElementById('metadata-body');
 
+    // Handle saving of the metadata on click of save button
     saveButton.addEventListener('click', function () {
-        // Send a message to the background script to save metadata
         browser.runtime.sendMessage({ action: "saveMetadata" }).then(response => {
-            alert(response.message);
+            if (response.success) {
+                showMessage(response.message, "success");
+            } else {
+                showMessage(response.message, "error");
+            }
         }).catch(error => {
-            alert("Error: " + error);
+            showMessage("Error: " + error, "error");
         });
     });
+
+    // Create a temporary message to display in the popup
+    function showMessage(msg, type) {
+        const messageElement = document.getElementById('message');
+        messageElement.textContent = msg;
+        messageElement.className = type;
+        messageElement.classList.add('show');
+
+        setTimeout(() => {
+            messageElement.classList.remove('show');
+            messageElement.classList.add('hide');
+        }, 1500);
+
+        setTimeout(() => {
+            // Clear the message
+            messageElement.textContent = '';
+            messageElement.classList.remove('hide');
+        }, 2000);
+    }
 
     // Update the viewButton event listener function to include new fields
     viewButton.addEventListener('click', function () {
