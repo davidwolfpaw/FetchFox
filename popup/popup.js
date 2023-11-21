@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const metadataTable = document.getElementById('metadata-table');
     const metadataBody = document.getElementById('metadata-body');
     const clearButton = document.getElementById('clear-metadata');
+    const exportButton = document.getElementById('export-metadata');
 
     // Handle saving of the metadata on click of save button
     saveButton.addEventListener('click', function () {
@@ -37,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 2000);
     }
 
-    // Update the viewButton event listener function to include new fields
+    // Handle viewing of the metadata on click of view button
     viewButton.addEventListener('click', function () {
         // Generate table content
         buildTable();
@@ -47,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
         clearButton.style.display = 'block';
     });
 
+    // Handle deletion of all metadata on click of delete button
     clearButton.addEventListener('click', function () {
         if (confirm('Are you sure that you want to clear all saved metadata?')) {
             browser.storage.local.set({ 'allMetadata': [] }).then(() => {
@@ -75,6 +77,26 @@ document.addEventListener('DOMContentLoaded', function () {
         }).catch(error => {
             alert('Error deleting metadata: ' + error);
         });
+    }
+
+    // Handle export of metadata on click of export button
+    exportButton.addEventListener('click', function () {
+        browser.storage.local.get('allMetadata').then(data => {
+            const metadata = data.allMetadata || [];
+            downloadObjectAsJson(metadata, 'exported_metadata');
+        }).catch(error => {
+            showMessage('Error exporting metadata: ' + error, 'error');
+        });
+    });
+
+    function downloadObjectAsJson(exportObj, exportName) {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", exportName + ".json");
+        document.body.appendChild(downloadAnchorNode); // Required for Firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
     }
 
     function buildTable() {
