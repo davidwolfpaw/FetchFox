@@ -84,14 +84,6 @@ function extractMetadata() {
             '[itemprop="author"]', '.wp-block-post-author__name'
         ], 'No author'),
 
-        image: () => findContentBySelectors([
-            'meta[property="og:image:secure_url"]', 'meta[name="og:image:secure_url"]',
-            'meta[property="og:image:url"]', 'meta[name="og:image:url"]',
-            'meta[property="og:image"]', 'meta[name="og:image"]',
-            'meta[property="twitter:image"]', 'meta[name="twitter:image"]',
-            'link[rel="image_src"]'
-        ], 'No image'),
-
         language: () => findContentBySelectors([
             'html[lang]', 'meta[property="language" i]', 'meta[name="language" i]',
             'meta[property="og:locale"]', 'meta[name="og:locale"]'
