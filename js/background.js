@@ -10,7 +10,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
             // Inject the content script to extract metadata from the active tab
             browser.tabs.executeScript(currentTab.id, { code: codeToInject }).then(results => {
                 const metadata = results[0];
-                metadata.linkType = 'article'; // Default link type
+                metadata.linkType = defaultLinkType(metadata);
 
                 // Save the extracted metadata to the extension's local storage
                 browser.storage.local.get("allMetadata").then(data => {
@@ -39,7 +39,20 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 });
 
-// Function to extract metadata from the current page
+// Determine default link type based on metadata
+function defaultLinkType(metadata) {
+    const url = metadata.url.toLowerCase();
+    const type = metadata.type.toLowerCase();
+
+    if (type.includes('audio')) return 'audio';
+    if (type.includes('video')) return 'video';
+    if (url.includes('youtube.com')) return 'video';
+    if (url.includes('play.pocketcasts.com') || url.includes('open.spotify.com')) return 'audio';
+
+    return 'article';
+}
+
+// Extract metadata from the current page
 function extractMetadata() {
     // Helper function to find content using a list of selectors
     const findContentBySelectors = (selectors, defaultValue = '') => {
@@ -161,6 +174,12 @@ function extractMetadata() {
         ], 'No audio')
     };
 
+
+    // Remove line breaks from a string
+    function sanitizeString(str) {
+        return str.replace(/(\r\n|\n|\r)/gm, ' ');
+    }
+
     // Extract metadata based on the defined rules
     let metadata = {};
     for (const key in metadataRules) {
@@ -176,12 +195,9 @@ function extractMetadata() {
         }
     }
     return metadata;
-
-    // Remove line breaks from a string
-    function sanitizeString(str) {
-        return str.replace(/(\r\n|\n|\r)/gm, ' ');
-    }
 }
+
+
 
 // Debugging: log the extracted metadata in the console
 console.log(extractMetadata());
