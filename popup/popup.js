@@ -83,9 +83,37 @@ document.addEventListener('DOMContentLoaded', function () {
     function exportMarkdown() {
         browser.storage.local.get('allMetadata').then(data => {
             const metadata = data.allMetadata || [];
-            const markdownContent = metadata.map(meta => {
-                return `[${meta.title || 'No title'} - ${meta.author || 'No author'}, ${meta.provider || 'No provider'}](${meta.url || ''})`;
-            }).join('\n');
+
+            // Group metadata by link type
+            const articles = metadata.filter(meta => meta.linkType === 'article');
+            const audios = metadata.filter(meta => meta.linkType === 'audio');
+            const videos = metadata.filter(meta => meta.linkType === 'video');
+
+            // Generate Markdown content
+            let markdownContent = '';
+
+            if (articles.length > 0) {
+                markdownContent += '## Articles\n';
+                articles.forEach(meta => {
+                    markdownContent += `[${meta.title || 'No title'} - ${meta.author || 'No author'}, ${meta.provider || 'No provider'}](${meta.url || ''})\n`;
+                });
+                markdownContent += '\n';
+            }
+
+            if (audios.length > 0) {
+                markdownContent += '## Audio\n';
+                audios.forEach(meta => {
+                    markdownContent += `[${meta.title || 'No title'} - ${meta.author || 'No author'}, ${meta.provider || 'No provider'}](${meta.url || ''})\n`;
+                });
+                markdownContent += '\n';
+            }
+
+            if (videos.length > 0) {
+                markdownContent += '## Videos\n';
+                videos.forEach(meta => {
+                    markdownContent += `[${meta.title || 'No title'} - ${meta.author || 'No author'}, ${meta.provider || 'No provider'}](${meta.url || ''})\n`;
+                });
+            }
 
             downloadTextAsFile(markdownContent, 'exported_metadata', 'md');
         }).catch(error => {
@@ -120,11 +148,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td>${meta.url || 'No URL'}</td>
                     <td>${meta.author || 'No author'}</td>
                     <td>${formatDate(meta.published) || 'No publish date'}</td>
+                    <td>
+                        <select class="link-type-dropdown" data-index="${index}">
+                            <option value="article" ${meta.type === 'article' ? 'selected' : ''}>Article</option>
+                            <option value="audio" ${meta.type === 'audio' ? 'selected' : ''}>Audio</option>
+                            <option value="video" ${meta.type === 'video' ? 'selected' : ''}>Video</option>
+                        </select>
+                    </td>
                 `;
 
                 // Add event listener to delete button
                 const deleteButton = row.querySelector('button');
                 deleteButton.addEventListener('click', () => deleteMetadata(index));
+
+                // Add event listener to link type dropdown
+                const linkTypeDropdown = row.querySelector('.link-type-dropdown');
+                linkTypeDropdown.addEventListener('change', (event) => updateLinkType(event, index));
 
                 // Set attributes for drag and drop
                 row.setAttribute('draggable', true);
@@ -157,6 +196,20 @@ document.addEventListener('DOMContentLoaded', function () {
             browser.storage.local.set({ 'allMetadata': metadata }).then(buildTable);
         }).catch(error => {
             alert('Error deleting metadata: ' + error);
+        });
+    }
+
+    // Function to update the link type
+    function updateLinkType(event, index) {
+        const newLinkType = event.target.value;
+        browser.storage.local.get('allMetadata').then(data => {
+            let metadata = data.allMetadata || [];
+            if (metadata[index]) {
+                metadata[index].linkType = newLinkType;
+                browser.storage.local.set({ 'allMetadata': metadata });
+            }
+        }).catch(error => {
+            alert('Error updating link type: ' + error);
         });
     }
 

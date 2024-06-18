@@ -10,6 +10,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
             // Inject the content script to extract metadata from the active tab
             browser.tabs.executeScript(currentTab.id, { code: codeToInject }).then(results => {
                 const metadata = results[0];
+                metadata.linkType = 'article'; // Default link type
 
                 // Save the extracted metadata to the extension's local storage
                 browser.storage.local.get("allMetadata").then(data => {
