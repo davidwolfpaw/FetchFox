@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const metadataTable = document.getElementById('metadata-table');
     const metadataBody = document.getElementById('metadata-body');
     const clearButton = document.getElementById('clear-metadata');
-    const exportButton = document.getElementById('export-metadata');
-    let dragSrcEl = null;
+    const exportJsonButton = document.getElementById('export-json');
+    const exportMarkdownButton = document.getElementById('export-markdown');
 
     // Event listener for saving metadata
     saveButton.addEventListener('click', saveMetadata);
@@ -13,8 +13,10 @@ document.addEventListener('DOMContentLoaded', function () {
     viewButton.addEventListener('click', buildTable);
     // Event listener for clearing all metadata
     clearButton.addEventListener('click', clearAllMetadata);
-    // Event listener for exporting metadata
-    exportButton.addEventListener('click', exportMetadata);
+    // Event listener for exporting metadata as JSON
+    exportJsonButton.addEventListener('click', exportJson);
+    // Event listener for exporting metadata as Markdown
+    exportMarkdownButton.addEventListener('click', exportMarkdown);
 
     // Function to handle saving metadata
     function saveMetadata() {
@@ -57,8 +59,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Function to export metadata
-    function exportMetadata() {
+    // Function to export metadata as JSON
+    function exportJson() {
         browser.storage.local.get('allMetadata').then(data => {
             downloadObjectAsJson(data.allMetadata || [], 'exported_metadata');
         }).catch(error => {
@@ -72,6 +74,31 @@ document.addEventListener('DOMContentLoaded', function () {
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
         downloadAnchorNode.setAttribute("download", exportName + ".json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    }
+
+    // Function to export metadata as Markdown
+    function exportMarkdown() {
+        browser.storage.local.get('allMetadata').then(data => {
+            const metadata = data.allMetadata || [];
+            const markdownContent = metadata.map(meta => {
+                return `[${meta.title || 'No title'} - ${meta.author || 'No author'}, ${meta.provider || 'No provider'}](${meta.url || ''})`;
+            }).join('\n');
+
+            downloadTextAsFile(markdownContent, 'exported_metadata', 'md');
+        }).catch(error => {
+            showMessage('Error exporting metadata: ' + error, 'error');
+        });
+    }
+
+    // Function to download text data as a file
+    function downloadTextAsFile(text, exportName, fileExtension) {
+        const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(text);
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", `${exportName}.${fileExtension}`);
         document.body.appendChild(downloadAnchorNode);
         downloadAnchorNode.click();
         downloadAnchorNode.remove();

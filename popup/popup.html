@@ -4,6 +4,8 @@
 <head>
     <title>FetchFox</title>
     <link rel="stylesheet" href="popup.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
@@ -11,7 +13,13 @@
         <div class="action-buttons">
             <button id="save-metadata">Save Metadata</button>
             <button id="view-metadata">View Saved Metadata</button>
-            <button id="export-metadata">Export Data</button>
+            <div class="dropdown">
+                <button id="export-dropdown-button">Export Data</button>
+                <div class="dropdown-content" id="export-dropdown-content">
+                    <button id="export-json">Export as JSON</button>
+                    <button id="export-markdown">Export as Markdown</button>
+                </div>
+            </div>
         </div>
         <div class="metadata-table-wrapper">
             <table id="metadata-table" style="display:none;">
