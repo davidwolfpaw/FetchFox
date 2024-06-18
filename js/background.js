@@ -196,8 +196,3 @@ function extractMetadata() {
     }
     return metadata;
 }
-
-
-
-// Debugging: log the extracted metadata in the console
-console.log(extractMetadata());
