@@ -84,9 +84,9 @@ function extractMetadata() {
         ], 'No author'),
 
         language: () => findContentBySelectors([
-            'html[lang]', 'meta[property="language" i]', 'meta[name="language" i]',
+            'meta[property="language" i]', 'meta[name="language" i]',
             'meta[property="og:locale"]', 'meta[name="og:locale"]'
-        ], 'No language specified'),
+        ], document.documentElement.lang),
 
         type: () => findContentBySelectors([
             'meta[property="og:type"]', 'meta[name="og:type"]',
