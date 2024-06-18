@@ -1,18 +1,17 @@
-// Listen for messages sent from popup.js
+// Listener for messages sent from popup.js
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "saveMetadata") {
+        // Query the active tab in the current window
         const querying = browser.tabs.query({ active: true, currentWindow: true });
         querying.then(tabs => {
             const currentTab = tabs[0];
-            // const codeToInject = `(${extractMetadata.toString()})(${JSON.stringify(metadataRules)});`;
             const codeToInject = `(${extractMetadata.toString()})();`;
-            browser.tabs.executeScript(currentTab.id, {
-                code: codeToInject
-                // code: `(${extractMetadata.toString()})();`
-            }).then(results => {
+
+            // Inject the content script to extract metadata from the active tab
+            browser.tabs.executeScript(currentTab.id, { code: codeToInject }).then(results => {
                 const metadata = results[0];
 
-                // Save to extension's storage and append to existing metadata
+                // Save the extracted metadata to the extension's local storage
                 browser.storage.local.get("allMetadata").then(data => {
                     let allMetadata = data.allMetadata || [];
                     allMetadata.push(metadata);
@@ -39,7 +38,9 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 });
 
+// Function to extract metadata from the current page
 function extractMetadata() {
+    // Helper function to find content using a list of selectors
     const findContentBySelectors = (selectors, defaultValue = '') => {
         for (const selector of selectors) {
             const element = document.querySelector(selector);
@@ -50,9 +51,7 @@ function extractMetadata() {
         return defaultValue;
     };
 
-
-    // metadataRules object defines the property names and potential values
-    //
+    // Object defining the metadata rules with selectors
     const metadataRules = {
         title: () => findContentBySelectors([
             'meta[property="og:title"]', 'meta[name="og:title"]',
@@ -114,7 +113,6 @@ function extractMetadata() {
             'meta[property="book:tag" i]', 'meta[name="book:tag" i]',
             'meta[property="topic" i]', 'meta[name="topic" i]'
         ], 'No keywords'),
-        // TODO: split keywords into separate tags
 
         section: () => findContentBySelectors([
             'meta[property="article:section"]', 'meta[name="article:section"]',
@@ -162,6 +160,7 @@ function extractMetadata() {
         ], 'No audio')
     };
 
+    // Extract metadata based on the defined rules
     let metadata = {};
     for (const key in metadataRules) {
         if (Object.prototype.hasOwnProperty.call(metadataRules, key)) {
@@ -178,5 +177,5 @@ function extractMetadata() {
     return metadata;
 }
 
-
+// Debugging: log the extracted metadata in the console
 console.log(extractMetadata());
