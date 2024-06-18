@@ -46,7 +46,7 @@ function extractMetadata() {
         for (const selector of selectors) {
             const element = document.querySelector(selector);
             if (element && (element.content || element.getAttribute('content') || element.textContent)) {
-                return element.content || element.getAttribute('content') || element.textContent;
+                return sanitizeString(element.content || element.getAttribute('content') || element.textContent);
             }
         }
         return defaultValue;
@@ -176,6 +176,11 @@ function extractMetadata() {
         }
     }
     return metadata;
+
+    // Remove line breaks from a string
+    function sanitizeString(str) {
+        return str.replace(/(\r\n|\n|\r)/gm, ' ');
+    }
 }
 
 // Debugging: log the extracted metadata in the console
