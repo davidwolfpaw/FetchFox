@@ -10,12 +10,12 @@ I curate a lot of videos, podcasts, and articles online for things like my perso
 
 To do this curation I do a lot of copypasting between multiple apps and spaces. I have been wanting a tool to make it easier for me to manage my curation, and I'm finally making one!
 
-The goal for this browser extension is to allow me to (eventually) one-click on a page and save the metadata that I use for sharing to browser storage. I can then filter and sort those links and send them where I will end up using them in the format that I want most. The goal is to save articles and save time!
+The goal for this browser extension is to allow me to save the metadata of an article, video, or podcast for sharing to browser storage. I can then filter and sort those links and send them where I will end up using them in the format that I want most. The goal is to save articles and save time!
 
 ### How do I use it?
 Right now I'm developing this browser extension for Firefox, and will try replicating it to other browsers when it is more stable.
 
-#### To install:
+#### To run this as a test extension:
 - Download the files and unzip them
 - Open a new tab in Firefox and go to `about:debugging#/runtime/this-firefox` in your address bar
 - Click "Load Temporary Add-on..."
@@ -24,10 +24,14 @@ Right now I'm developing this browser extension for Firefox, and will try replic
 #### To use the extension:
 - Click "Save Metadata" to save the metadata of the current tab
 - Click "View Saved Metadata" to see the existing saved pages in a table
-- Click the "x" button next to a row to delete it
-- Click "Clear All Data" to delete all rows
 - Drag and drop rows into the order that you want
-- Click "Export Data" to get a json file of all data
+- Click the "x" button next to a row to delete it
+- Select a content type to organize your links
+- Click "Clear All Data" to delete all rows
+- Click "Export Data" to get export options (currently JSON or Markdown)
+- Click "Export JSON" to get a JSON file of all saved metadata
+- Click "Export Markdown" to get a markdown file of select metadata
+- Use the input and shortcodes under the export buttons to design the format of the Markdown that is exported
 
 #### Metadata collected:
 - title
@@ -45,7 +49,7 @@ Right now I'm developing this browser extension for Firefox, and will try replic
 - image
 - video
 - audio
-
+- link sorting type
 
 ### What if I want to make changes to it?
 You are free to fork this for your personal use. It is under active development and will be made for very specific needs before being generalized for anyone to use.
