@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const exportJsonButton = document.getElementById('export-json');
     const exportMarkdownButton = document.getElementById('export-markdown');
     const exportOptions = document.getElementById('export-options');
+    const exportTemplate = document.getElementById('export-template');
     const templateTextArea = document.getElementById('template');
 
     // Set a default template for Markdown export
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Event listener for showing export options
     exportDropdownButton.addEventListener('click', () => {
         exportOptions.style.display = exportOptions.style.display === 'none' ? 'block' : 'none';
+        exportTemplate.style.display = exportTemplate.style.display === 'none' ? 'flex' : 'none';
     });
     // Event listener for exporting metadata as JSON
     exportJsonButton.addEventListener('click', exportJson);
