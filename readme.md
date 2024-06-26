@@ -53,14 +53,8 @@ You are free to fork this for your personal use. It is under active development 
 If you think that you come up with something that you want to share back, I'm more than happy to check it out!
 
 ### Screenshots
-#### FetchFox screenshot showing main popup
-![FetchFox screenshot showing main popup](/images/fetchfox-screenshot-1.jpg?raw=true "FetchFox screenshot showing main popup")
+#### FetchFox screenshot showing main popup with saved metadata
+![FetchFox screenshot showing main popup with saved metadata](/images/fetchfox-screenshot-1.jpg?raw=true "FetchFox screenshot showing main popup with saved metadata")
 
-#### FetchFox screenshot showing main popup with successful metadata save
-![FetchFox screenshot showing main popup with successful metadata save](/images/fetchfox-screenshot-2.jpg?raw=true "FetchFox screenshot showing main popup with successful metadata save")
-
-#### FetchFox screenshot showing table of saved metadata
-![FetchFox screenshot showing table of saved metadata](/images/fetchfox-screenshot-3.jpg?raw=true "FetchFox screenshot showing table of saved metadata")
-
-#### FetchFox screenshot showing clear all metadata prompt
-![FetchFox screenshot showing clear all metadata prompt](/images/fetchfox-screenshot-4.jpg?raw=true "FetchFox screenshot showing clear all metadata prompt")
+#### FetchFox screenshot showing main popup with export options
+![FetchFox screenshot showing main popup with export options](/images/fetchfox-screenshot-2.jpg?raw=true "FetchFox screenshot showing main popup with export options")
