@@ -4,8 +4,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const metadataTable = document.getElementById('metadata-table');
     const metadataBody = document.getElementById('metadata-body');
     const clearButton = document.getElementById('clear-metadata');
+    const exportDropdownButton = document.getElementById('export-dropdown');
     const exportJsonButton = document.getElementById('export-json');
     const exportMarkdownButton = document.getElementById('export-markdown');
+    const exportOptions = document.getElementById('export-options');
+    const templateTextArea = document.getElementById('template');
+
+    // Set a default template for Markdown export
+    const defaultTemplate = "[[title] - [author], [provider]]([url])";
 
     // Event listener for saving metadata
     saveButton.addEventListener('click', saveMetadata);
@@ -13,6 +19,10 @@ document.addEventListener('DOMContentLoaded', function () {
     viewButton.addEventListener('click', buildTable);
     // Event listener for clearing all metadata
     clearButton.addEventListener('click', clearAllMetadata);
+    // Event listener for showing export options
+    exportDropdownButton.addEventListener('click', () => {
+        exportOptions.style.display = exportOptions.style.display === 'none' ? 'block' : 'none';
+    });
     // Event listener for exporting metadata as JSON
     exportJsonButton.addEventListener('click', exportJson);
     // Event listener for exporting metadata as Markdown
@@ -81,39 +91,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to export metadata as Markdown
     function exportMarkdown() {
+        const template = templateTextArea.value.trim() || defaultTemplate;
         browser.storage.local.get('allMetadata').then(data => {
             const metadata = data.allMetadata || [];
-
-            // Group metadata by link type
-            const articles = metadata.filter(meta => meta.linkType === 'article');
-            const audios = metadata.filter(meta => meta.linkType === 'audio');
-            const videos = metadata.filter(meta => meta.linkType === 'video');
-
-            // Generate Markdown content
             let markdownContent = '';
 
-            if (articles.length > 0) {
-                markdownContent += '## Articles\n';
-                articles.forEach(meta => {
-                    markdownContent += `[${meta.title || 'No title'} - ${meta.author || 'No author'}, ${meta.provider || 'No provider'}](${meta.url || ''})\n`;
-                });
-                markdownContent += '\n';
-            }
-
-            if (audios.length > 0) {
-                markdownContent += '## Audio\n';
-                audios.forEach(meta => {
-                    markdownContent += `[${meta.title || 'No title'} - ${meta.author || 'No author'}, ${meta.provider || 'No provider'}](${meta.url || ''})\n`;
-                });
-                markdownContent += '\n';
-            }
-
-            if (videos.length > 0) {
-                markdownContent += '## Videos\n';
-                videos.forEach(meta => {
-                    markdownContent += `[${meta.title || 'No title'} - ${meta.author || 'No author'}, ${meta.provider || 'No provider'}](${meta.url || ''})\n`;
-                });
-            }
+            metadata.forEach(meta => {
+                let line = template;
+                for (const key in meta) {
+                    if (meta.hasOwnProperty(key)) {
+                        const regex = new RegExp(`\\[${key}\\]`, 'g');
+                        line = line.replace(regex, meta[key] || '');
+                    }
+                }
+                markdownContent += line + '\n';
+            });
 
             downloadTextAsFile(markdownContent, 'exported_metadata', 'md');
         }).catch(error => {
@@ -150,9 +142,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td>${formatDate(meta.published) || 'No publish date'}</td>
                     <td>
                         <select class="link-type-dropdown" data-index="${index}">
-                            <option value="article" ${meta.type === 'article' ? 'selected' : ''}>Article</option>
-                            <option value="audio" ${meta.type === 'audio' ? 'selected' : ''}>Audio</option>
-                            <option value="video" ${meta.type === 'video' ? 'selected' : ''}>Video</option>
+                            <option value="article" ${meta.linkType === 'article' ? 'selected' : ''}>Article</option>
+                            <option value="audio" ${meta.linkType === 'audio' ? 'selected' : ''}>Audio</option>
+                            <option value="video" ${meta.linkType === 'video' ? 'selected' : ''}>Video</option>
                         </select>
                     </td>
                 `;
@@ -206,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let metadata = data.allMetadata || [];
             if (metadata[index]) {
                 metadata[index].linkType = newLinkType;
-                browser.storage.local.set({ 'allMetadata': metadata });
+                browser.storage.local.set({ 'allMetadata': metadata }).then(buildTable);
             }
         }).catch(error => {
             alert('Error updating link type: ' + error);

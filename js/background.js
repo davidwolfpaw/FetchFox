@@ -6,11 +6,13 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         querying.then(tabs => {
             const currentTab = tabs[0];
             const codeToInject = `(${extractMetadata.toString()})();`;
+            console.log(codeToInject);
 
             // Inject the content script to extract metadata from the active tab
             browser.tabs.executeScript(currentTab.id, { code: codeToInject }).then(results => {
                 const metadata = results[0];
                 metadata.linkType = defaultLinkType(metadata);
+                console.log('Default link type set to:', metadata.linkType);
 
                 // Save the extracted metadata to the extension's local storage
                 browser.storage.local.get("allMetadata").then(data => {
@@ -90,11 +92,13 @@ function extractMetadata() {
         author: () => findContentBySelectors([
             'meta[property="article:author"]', 'meta[name="article:author"]',
             'meta[property="parsely-author"]', 'meta[name="parsely-author"]',
-            'a[class*="author" i]', '[rel="author"]',
+            'a[class*="author" i]', '[rel="author"]', 'meta[property="og:author"]',
             'meta[name="author"]', 'meta[property="book:author"]',
             'meta[property="twitter:creator"]', 'meta[name="twitter:creator"]',
             'meta[property="profile:username"]', 'meta[name="profile:username"]',
-            '[itemprop="author"]', '.wp-block-post-author__name'
+            '[itemprop="author"]', '.wp-block-post-author__name',
+            'meta[itemprop="author"]', 'link[itemprop="name"]',
+            'a[href^="/artist/"] span', 'a[class*="podcast-title"]'
         ], 'No author'),
 
         language: () => findContentBySelectors([
@@ -138,7 +142,8 @@ function extractMetadata() {
             'meta[property="published_time"]', 'meta[name="published_time"]',
             'meta[property="parsely-pub-date"]', 'meta[name="parsely-pub-date"]',
             'meta[property="date" i]', 'meta[name="date" i]',
-            'meta[property="release_date" i]', 'meta[name="release_date" i]'
+            'meta[property="release_date" i]', 'meta[name="release_date" i]',
+            'meta[itemprop="datePublished"]'
         ], 'No publish date'),
 
         modified: () => findContentBySelectors([
@@ -173,7 +178,6 @@ function extractMetadata() {
             'meta[property="og:audio"]', 'meta[name="og:audio"]'
         ], 'No audio')
     };
-
 
     // Remove line breaks from a string
     function sanitizeString(str) {

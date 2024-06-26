@@ -186,6 +186,10 @@ button:focus-visible {
     background-color: #ff4d4d;
 }
 
+#export-template {
+    display: flex;
+}
+
 /* Tables */
 table {
     width: 100%;

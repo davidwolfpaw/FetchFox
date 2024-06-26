@@ -3,9 +3,7 @@
 
 <head>
     <title>FetchFox</title>
-    <link rel="stylesheet" href="popup.css"/>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="popup.css" />
 </head>
 
 <body>
@@ -13,12 +11,10 @@
         <div class="action-buttons">
             <button id="save-metadata">Save Metadata</button>
             <button id="view-metadata">View Saved Metadata</button>
-            <div class="dropdown">
-                <button id="export-dropdown-button">Export Data</button>
-                <div class="dropdown-content" id="export-dropdown-content">
-                    <button id="export-json">Export as JSON</button>
-                    <button id="export-markdown">Export as Markdown</button>
-                </div>
+            <button id="export-dropdown">Export Data</button>
+            <div id="export-options" style="display:none;">
+                <button id="export-json">Export JSON</button>
+                <button id="export-markdown">Export Markdown</button>
             </div>
         </div>
         <div class="metadata-table-wrapper">
@@ -30,7 +26,7 @@
                         <th>URL</th>
                         <th>Author</th>
                         <th>Publish Date</th>
-                        <th>Type</th>
+                        <th>Link Type</th>
                     </tr>
                 </thead>
                 <tbody id="metadata-body">
@@ -38,6 +34,13 @@
                 </tbody>
             </table>
             <button id="clear-metadata" style="display: none;">Clear All Data</button>
+        </div>
+        <div id="export-template">
+            <div>
+                <label for="template"><strong>Export Template</strong></label><br>
+                <desc><em>Available options:</em><br>[title], [url], [author], [published], [description], [linkType], [provider], [language], [keywords], [section], [modified], [image], [video], [audio]</desc>
+            </div>
+            <textarea id="template" rows="4" cols="50" placeholder="[[title] - [author], [provider]]([url])"></textarea>
         </div>
         <div id="message"></div>
     </div>
