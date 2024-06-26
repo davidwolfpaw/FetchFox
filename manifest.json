@@ -4,7 +4,11 @@
     "version": "0.1",
     "description": "Collects metadata of the current page and saves it to browser.storage.local for content curation",
     "icons": {
-        "48": "icons/icon-48.png"
+        "48": "icons/icon-48.png",
+        "96": "icons/icon-96.png",
+        "144": "icons/icon-144.png",
+        "256": "icons/icon-256.png",
+        "512": "icons/icon-512.png"
     },
     "background": {
         "scripts": [
