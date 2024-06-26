@@ -1,9 +1,5 @@
 # FetchFox - Curation Collector
-## Collects metadata of the current page and saves it to browser.storage.local for content curation
-
-*This project is currently being developed for personal use and specific needs. Take this and modify it!*
-
-*This project is currently alpha, with basic functionality only. Working through a long feature list*
+## Collects metadata of the current page and saves it to Local Browser Storage for content curation
 
 ### What is this project for?
 I curate a lot of videos, podcasts, and articles online for things like my personal newsletter [david.garden/newsletter/](https://david.garden/newsletter/), vlogs [youtube.com/@BowieBarks](https://www.youtube.com/@BowieBarks), and Mastodon posts [@david@tech.lgbt](https://tech.lgbt/@david).
