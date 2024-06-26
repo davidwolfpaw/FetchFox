@@ -135,29 +135,63 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Populate table with metadata
             metadata.forEach((meta, index) => {
-                const row = metadataBody.insertRow();
-                row.innerHTML = `
-                    <td><button>\u{2716}</button></td>
-                    <td>${meta.title || 'No title'}</td>
-                    <td>${meta.url || 'No URL'}</td>
-                    <td>${meta.author || 'No author'}</td>
-                    <td>${formatDate(meta.published) || 'No publish date'}</td>
-                    <td>
-                        <select class="link-type-dropdown" data-index="${index}">
-                            <option value="article" ${meta.linkType === 'article' ? 'selected' : ''}>Article</option>
-                            <option value="audio" ${meta.linkType === 'audio' ? 'selected' : ''}>Audio</option>
-                            <option value="video" ${meta.linkType === 'video' ? 'selected' : ''}>Video</option>
-                        </select>
-                    </td>
-                `;
+                const row = document.createElement('tr');
 
-                // Add event listener to delete button
-                const deleteButton = row.querySelector('button');
+                // Create and append delete button cell
+                const deleteCell = document.createElement('td');
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '\u{2716}';
                 deleteButton.addEventListener('click', () => deleteMetadata(index));
+                deleteCell.appendChild(deleteButton);
+                row.appendChild(deleteCell);
 
-                // Add event listener to link type dropdown
-                const linkTypeDropdown = row.querySelector('.link-type-dropdown');
+                // Create and append title cell
+                const titleCell = document.createElement('td');
+                titleCell.textContent = meta.title || 'No title';
+                row.appendChild(titleCell);
+
+                // Create and append URL cell
+                const urlCell = document.createElement('td');
+                urlCell.textContent = meta.url || 'No URL';
+                row.appendChild(urlCell);
+
+                // Create and append author cell
+                const authorCell = document.createElement('td');
+                authorCell.textContent = meta.author || 'No author';
+                row.appendChild(authorCell);
+
+                // Create and append publish date cell
+                const publishDateCell = document.createElement('td');
+                publishDateCell.textContent = formatDate(meta.published) || 'No publish date';
+                row.appendChild(publishDateCell);
+
+                // Create and append link type cell with dropdown
+                const linkTypeCell = document.createElement('td');
+                const linkTypeDropdown = document.createElement('select');
+                linkTypeDropdown.classList.add('link-type-dropdown');
+                linkTypeDropdown.dataset.index = index;
+
+                const articleOption = document.createElement('option');
+                articleOption.value = 'article';
+                articleOption.selected = meta.linkType === 'article';
+                articleOption.textContent = 'Article';
+                linkTypeDropdown.appendChild(articleOption);
+
+                const audioOption = document.createElement('option');
+                audioOption.value = 'audio';
+                audioOption.selected = meta.linkType === 'audio';
+                audioOption.textContent = 'Audio';
+                linkTypeDropdown.appendChild(audioOption);
+
+                const videoOption = document.createElement('option');
+                videoOption.value = 'video';
+                videoOption.selected = meta.linkType === 'video';
+                videoOption.textContent = 'Video';
+                linkTypeDropdown.appendChild(videoOption);
+
                 linkTypeDropdown.addEventListener('change', (event) => updateLinkType(event, index));
+                linkTypeCell.appendChild(linkTypeDropdown);
+                row.appendChild(linkTypeCell);
 
                 // Set attributes for drag and drop
                 row.setAttribute('draggable', true);
@@ -171,6 +205,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 row.addEventListener('dragleave', handleDragLeave);
                 row.addEventListener('drop', handleDrop);
                 row.addEventListener('dragend', handleDragEnd);
+
+                // Append row to table body
+                metadataBody.appendChild(row);
             });
 
             // Show the table
@@ -181,6 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('Error retrieving metadata: ' + error);
         });
     }
+
 
     // Function to delete a specific metadata entry
     function deleteMetadata(index) {
