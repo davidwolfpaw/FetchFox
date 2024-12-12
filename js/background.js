@@ -87,6 +87,12 @@ function extractMetadata() {
             if (jsonLd && jsonLd.name) {
                 return sanitizeString(jsonLd.name);
             }
+            if (window.location.hostname.includes('play.pocketcasts.com')) {
+                const pocketcastsTitle = document.querySelector('#modal-root .title');
+                if (pocketcastsTitle) {
+                    return sanitizeString(pocketcastsTitle.textContent);
+                }
+            }
             return findContentBySelectors([
                 'meta[property="og:title"]', 'meta[name="og:title"]',
                 'meta[property="twitter:title"]', 'meta[name="twitter:title"]',
@@ -113,9 +119,15 @@ function extractMetadata() {
             if (jsonLd && jsonLd.url) {
                 return sanitizeString(jsonLd.url);
             }
+            if (window.location.hostname.includes('play.pocketcasts.com')) {
+                const pocketcastsUrl = document.querySelector('#modal-root .link input');
+                if (pocketcastsUrl) {
+                    return sanitizeString(pocketcastsUrl.value);
+                }
+            }
             return findContentBySelectors([
                 'link[rel="canonical"]', 'meta[property="og:url"]', 'meta[name="og:url"]',
-                'meta[property="al:web:url"]', 'meta[name="al:web:url"]',
+                'medta[property="al:web:url"]', 'meta[name="al:web:url"]',
                 'meta[property="parsely-link"]', 'meta[name="parsely-link"]'
             ], window.location.href);
         },
@@ -124,6 +136,31 @@ function extractMetadata() {
             const jsonLd = parseJsonLd();
             if (jsonLd && jsonLd.author && jsonLd.author.name) {
                 return sanitizeString(jsonLd.author.name);
+            }
+            const hostname = window.location.hostname;
+            if (hostname.includes('youtube.com')) {
+                // Specific extraction for YouTube uploader channel name
+                const youtubeAuthor = document.querySelector('link[itemprop="name"]');
+                if (youtubeAuthor) {
+                    return sanitizeString(youtubeAuthor.getAttribute('content') || youtubeAuthor.textContent);
+                }
+                // Fallback extraction for YouTube channel name
+                const youtubeChannelName = document.querySelector('#upload-info ytd-channel-name a');
+                if (youtubeChannelName) {
+                    return sanitizeString(youtubeChannelName.textContent);
+                }
+            } else if (hostname.includes('open.spotify.com')) {
+                // Specific extraction for Spotify
+                const spotifyArtist = document.querySelector('a[href^="/artist/"] span');
+                if (spotifyArtist) {
+                    return sanitizeString(spotifyArtist.textContent);
+                }
+            } else if (hostname.includes('play.pocketcasts.com')) {
+                // Specific extraction for podcast authors in the modal
+                const podcastAuthor = document.querySelector('#modal-root .desc');
+                if (podcastAuthor) {
+                    return sanitizeString(podcastAuthor.textContent);
+                }
             }
             return findContentBySelectors([
                 'meta[property="article:author"]', 'meta[name="article:author"]',
