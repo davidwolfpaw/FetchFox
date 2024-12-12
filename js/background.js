@@ -139,24 +139,20 @@ function extractMetadata() {
             }
             const hostname = window.location.hostname;
             if (hostname.includes('youtube.com')) {
-                // Specific extraction for YouTube uploader channel name
                 const youtubeAuthor = document.querySelector('link[itemprop="name"]');
                 if (youtubeAuthor) {
                     return sanitizeString(youtubeAuthor.getAttribute('content') || youtubeAuthor.textContent);
                 }
-                // Fallback extraction for YouTube channel name
                 const youtubeChannelName = document.querySelector('#upload-info ytd-channel-name a');
                 if (youtubeChannelName) {
                     return sanitizeString(youtubeChannelName.textContent);
                 }
             } else if (hostname.includes('open.spotify.com')) {
-                // Specific extraction for Spotify
                 const spotifyArtist = document.querySelector('a[href^="/artist/"] span');
                 if (spotifyArtist) {
                     return sanitizeString(spotifyArtist.textContent);
                 }
             } else if (hostname.includes('play.pocketcasts.com')) {
-                // Specific extraction for podcast authors in the modal
                 const podcastAuthor = document.querySelector('#modal-root .desc');
                 if (podcastAuthor) {
                     return sanitizeString(podcastAuthor.textContent);
