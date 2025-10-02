@@ -1,6 +1,6 @@
 {
     "manifest_version": 2,
-    "name": "FetchFox - Curation Collector dev",
+    "name": "FetchFox - Curation Collector",
     "version": "0.3",
     "description": "Collects metadata of the current page and saves it to browser.storage.local for content curation",
     "icons": {
