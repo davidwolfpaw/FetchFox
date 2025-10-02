@@ -22,9 +22,15 @@
         },
         "default_popup": "popup/popup.html"
     },
-    "data_collection_permissions": {
-        "required": ["none"]
-    }
+    "browser_specific_settings": {
+        "gecko": {
+            "data_collection_permissions": {
+                "required": [
+                    "none"
+                ]
+            }
+        }
+    },
     "permissions": [
         "activeTab",
         "storage",
