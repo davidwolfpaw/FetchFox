@@ -69,10 +69,13 @@ function extractMetadata() {
 
     // Helper function to parse JSON-LD data
     const parseJsonLd = () => {
-        const scriptElement = document.querySelector('script[type="application/ld+json"]');
-        if (scriptElement) {
+        const scriptElements = document.querySelectorAll('script[type="application/ld+json"]');
+        for (const scriptElement of scriptElements) {
             try {
-                return JSON.parse(scriptElement.textContent);
+                const jsonData = JSON.parse(scriptElement.textContent);
+                if (jsonData['@type'] === 'CreativeWorkSeries' || jsonData['@type'] === 'PodcastEpisode') {
+                    return jsonData;
+                }
             } catch (e) {
                 console.error('Error parsing JSON-LD:', e);
             }
@@ -87,16 +90,11 @@ function extractMetadata() {
             if (jsonLd && jsonLd.name) {
                 return sanitizeString(jsonLd.name);
             }
-            if (window.location.hostname.includes('play.pocketcasts.com')) {
-                const pocketcastsTitle = document.querySelector('#modal-root .title');
-                if (pocketcastsTitle) {
-                    return sanitizeString(pocketcastsTitle.textContent);
-                }
-            }
             return findContentBySelectors([
                 'meta[property="og:title"]', 'meta[name="og:title"]',
                 'meta[property="twitter:title"]', 'meta[name="twitter:title"]',
                 'meta[property="parsely-title"]', 'meta[name="parsely-title"]',
+                'meta[name="apple:title"]',
                 'title', 'h1'
             ], 'No title');
         },
@@ -119,25 +117,31 @@ function extractMetadata() {
             if (jsonLd && jsonLd.url) {
                 return sanitizeString(jsonLd.url);
             }
-            if (window.location.hostname.includes('play.pocketcasts.com')) {
-                const pocketcastsUrl = document.querySelector('#modal-root .link input');
-                if (pocketcastsUrl) {
-                    return sanitizeString(pocketcastsUrl.value);
+            const hostname = window.location.hostname;
+            if (hostname.includes('pocketcasts.com')) {
+                const episodeURL = document.querySelector('input[placeholder="Getting link..."]');
+                if (episodeURL) {
+                    return sanitizeString(episodeURL.value);
                 }
             }
             return findContentBySelectors([
                 'link[rel="canonical"]', 'meta[property="og:url"]', 'meta[name="og:url"]',
-                'medta[property="al:web:url"]', 'meta[name="al:web:url"]',
+                'meta[property="al:web:url"]', 'meta[name="al:web:url"]',
                 'meta[property="parsely-link"]', 'meta[name="parsely-link"]'
             ], window.location.href);
         },
 
         author: () => {
             const jsonLd = parseJsonLd();
+            const hostname = window.location.hostname;
             if (jsonLd && jsonLd.author && jsonLd.author.name) {
                 return sanitizeString(jsonLd.author.name);
             }
-            const hostname = window.location.hostname;
+            if (hostname.includes('podcasts.apple.com')) {
+                if (jsonLd && jsonLd.partOfSeries && jsonLd.partOfSeries.name) {
+                    return sanitizeString(jsonLd.partOfSeries.name);
+                }
+            }
             if (hostname.includes('youtube.com')) {
                 const youtubeAuthor = document.querySelector('link[itemprop="name"]');
                 if (youtubeAuthor) {
@@ -147,13 +151,9 @@ function extractMetadata() {
                 if (youtubeChannelName) {
                     return sanitizeString(youtubeChannelName.textContent);
                 }
-            } else if (hostname.includes('open.spotify.com')) {
-                const spotifyArtist = document.querySelector('a[href^="/artist/"] span');
-                if (spotifyArtist) {
-                    return sanitizeString(spotifyArtist.textContent);
-                }
-            } else if (hostname.includes('play.pocketcasts.com')) {
-                const podcastAuthor = document.querySelector('#modal-root .desc');
+            }
+            if (hostname.includes('pocketcasts.com')) {
+                const podcastAuthor = document.querySelector('div[class="desc"]');
                 if (podcastAuthor) {
                     return sanitizeString(podcastAuthor.textContent);
                 }
