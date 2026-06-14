@@ -223,6 +223,19 @@ tr:hover {
     background-color: #ddd;
 }
 
+/* Annotation Input */
+.annotation-input {
+    width: 100%;
+    min-width: 150px;
+    box-sizing: border-box;
+    font-size: 0.85rem;
+    padding: 3px 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    resize: vertical;
+    font-family: inherit;
+}
+
 /* Layout */
 .wrapper {
     height: 100%;

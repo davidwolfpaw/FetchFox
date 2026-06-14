@@ -1,0 +1,12 @@
+{
+  "name": "fetchfox",
+  "version": "0.4.0",
+  "private": true,
+  "scripts": {
+    "dev": "web-ext run --source-dir .",
+    "build": "web-ext build --source-dir . --artifacts-dir dist --ignore-files 'dist/' 'node_modules/' 'images/' '*.zip' '*.md'"
+  },
+  "devDependencies": {
+    "web-ext": "*"
+  }
+}

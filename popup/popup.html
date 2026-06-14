@@ -15,6 +15,7 @@
             <div id="export-options" style="display:none;">
                 <button id="export-json" class="button-green">Export JSON</button>
                 <button id="export-markdown" class="button-green">Export Markdown</button>
+                <button id="export-html" class="button-green">Export HTML (WordPress)</button>
             </div>
         </div>
         <div class="metadata-table-wrapper">
@@ -27,6 +28,7 @@
                         <th>Author</th>
                         <th>Publish Date</th>
                         <th>Link Type</th>
+                        <th>Annotation</th>
                     </tr>
                 </thead>
                 <tbody id="metadata-body">
@@ -38,7 +40,7 @@
         <div id="export-template" style="display:none;">
             <div>
                 <label for="template"><strong>Export Template</strong></label><br>
-                <desc><em>Available options:</em><br>[title], [url], [author], [published], [description], [linkType], [provider], [language], [keywords], [section], [modified], [image], [video], [audio]</desc>
+                <desc><em>Available options:</em><br>[title], [url], [author], [published], [description], [linkType], [provider], [language], [keywords], [section], [modified], [image], [video], [audio], [annotation]</desc>
             </div>
             <textarea id="template" rows="4" cols="50" placeholder="[[title] - [author], [provider]]([url])"></textarea>
         </div>

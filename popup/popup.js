@@ -7,12 +7,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const exportDropdownButton = document.getElementById('export-dropdown');
     const exportJsonButton = document.getElementById('export-json');
     const exportMarkdownButton = document.getElementById('export-markdown');
+    const exportHtmlButton = document.getElementById('export-html');
     const exportOptions = document.getElementById('export-options');
     const exportTemplate = document.getElementById('export-template');
     const templateTextArea = document.getElementById('template');
 
     // Set a default template for Markdown export
-    const defaultTemplate = "[[title] - [author], [provider]]([url])";
+    const defaultTemplate = "[[title] - [author], [provider]]([url])\n[annotation]";
 
     // Event listener for saving metadata
     saveButton.addEventListener('click', saveMetadata);
@@ -29,6 +30,8 @@ document.addEventListener('DOMContentLoaded', function () {
     exportJsonButton.addEventListener('click', exportJson);
     // Event listener for exporting metadata as Markdown
     exportMarkdownButton.addEventListener('click', exportMarkdown);
+    // Event listener for exporting metadata as WordPress HTML
+    exportHtmlButton.addEventListener('click', exportHtml);
 
     // Function to handle saving metadata
     function saveMetadata() {
@@ -106,6 +109,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         line = line.replace(regex, meta[key] || '');
                     }
                 }
+                // Remove unreplaced placeholders (e.g. [annotation] when unset) — single lowercase word only
+                line = line.replace(/\[[a-z]+\]/g, '');
+                line = line.split('\n').filter(l => l.trim() !== '').join('\n');
                 markdownContent += line + '\n';
             });
 
@@ -193,6 +199,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 linkTypeCell.appendChild(linkTypeDropdown);
                 row.appendChild(linkTypeCell);
 
+                // Create and append annotation cell
+                const annotationCell = document.createElement('td');
+                const annotationInput = document.createElement('textarea');
+                annotationInput.classList.add('annotation-input');
+                annotationInput.value = meta.annotation || '';
+                annotationInput.placeholder = 'Add annotation...';
+                annotationInput.rows = 2;
+                annotationInput.addEventListener('change', (event) => updateAnnotation(event, index));
+                annotationInput.addEventListener('dragstart', (e) => e.stopPropagation());
+                annotationInput.addEventListener('mousedown', (e) => e.stopPropagation());
+                annotationCell.appendChild(annotationInput);
+                row.appendChild(annotationCell);
+
                 // Set attributes for drag and drop
                 row.setAttribute('draggable', true);
                 row.setAttribute('class', 'draggable');
@@ -243,6 +262,69 @@ document.addEventListener('DOMContentLoaded', function () {
         }).catch(error => {
             alert('Error updating link type: ' + error);
         });
+    }
+
+    // Function to update the annotation
+    function updateAnnotation(event, index) {
+        const newAnnotation = event.target.value;
+        browser.storage.local.get('allMetadata').then(data => {
+            let metadata = data.allMetadata || [];
+            if (metadata[index]) {
+                metadata[index].annotation = newAnnotation;
+                browser.storage.local.set({ 'allMetadata': metadata });
+            }
+        }).catch(error => {
+            alert('Error updating annotation: ' + error);
+        });
+    }
+
+    // Function to export metadata as WordPress block HTML
+    function exportHtml() {
+        const template = templateTextArea.value.trim() || defaultTemplate;
+        // Use only the first line of the template — annotation is a separate paragraph
+        const linkTemplate = template.split('\n')[0];
+        browser.storage.local.get('allMetadata').then(data => {
+            const metadata = data.allMetadata || [];
+            let blocks = '';
+
+            metadata.forEach(meta => {
+                let linkText = linkTemplate;
+                for (const key in meta) {
+                    if (meta.hasOwnProperty(key)) {
+                        const regex = new RegExp(`\\[${key}\\]`, 'g');
+                        linkText = linkText.replace(regex, meta[key] || '');
+                    }
+                }
+                // Strip markdown link syntax: [[text]]([url]) → text with separate href
+                const mdLinkMatch = linkText.match(/^\[(.+)\]\((.+)\)$/);
+                let linkHtml;
+                if (mdLinkMatch) {
+                    linkHtml = `<a href="${escapeHtml(mdLinkMatch[2])}">${escapeHtml(mdLinkMatch[1])}</a>`;
+                } else {
+                    linkHtml = escapeHtml(linkText);
+                }
+
+                let block = `<!-- wp:group -->\n<div class="wp-block-group"><!-- wp:paragraph -->\n<p>${linkHtml}</p>\n<!-- /wp:paragraph -->`;
+                if (meta.annotation) {
+                    block += `\n\n<!-- wp:paragraph -->\n<p>${escapeHtml(meta.annotation)}</p>\n<!-- /wp:paragraph -->`;
+                }
+                block += `</div>\n<!-- /wp:group -->`;
+                blocks += block + '\n\n';
+            });
+
+            downloadTextAsFile(blocks.trim(), 'exported_links_wp', 'html');
+        }).catch(error => {
+            showMessage('Error exporting HTML: ' + error, 'error');
+        });
+    }
+
+    // Escape HTML special characters
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
     }
 
     // Drag and drop event handlers

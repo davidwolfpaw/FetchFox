@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "FetchFox - Curation Collector",
-    "version": "0.3",
+    "version": "0.4",
     "description": "Collects metadata of the current page and saves it to browser.storage.local for content curation",
     "icons": {
         "48": "icons/icon-48.png",
@@ -24,11 +24,16 @@
     },
     "browser_specific_settings": {
         "gecko": {
+            "id": "{e6c9d583-ae72-4f1d-8fe2-ea14b70b3b1d}",
+            "strict_min_version": "140.0",
             "data_collection_permissions": {
                 "required": [
                     "none"
                 ]
             }
+        },
+        "gecko_android": {
+            "strict_min_version": "142.0"
         }
     },
     "permissions": [
