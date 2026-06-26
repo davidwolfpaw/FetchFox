@@ -1,2 +1,4 @@
 dist/
 .claude/
+
+node_modules.nosync
