@@ -240,7 +240,7 @@ tr:hover {
 .wrapper {
     height: 100%;
     width: 100%;
-    min-width: 400px;
+    min-width: 600px;
     overflow-y: hidden;
     padding: 10px;
 }
