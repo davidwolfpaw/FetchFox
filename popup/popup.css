@@ -12,8 +12,8 @@
 body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    width: 100%;
-    overflow: visible;
+    width: 800px;
+    overflow-x: hidden;
 }
 
 /* Alert Message */
@@ -182,6 +182,13 @@ button:focus-visible {
     display: block;
 }
 
+td:nth-child(1) button {
+    padding: 2px 4px;
+    font-size: 0.75rem;
+    min-width: unset;
+    line-height: 1;
+}
+
 #clear-metadata {
     background-color: #ff6666;
 }
@@ -199,20 +206,45 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin: 15px 0;
-    min-width: 400px;
+    table-layout: fixed;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
 }
+
+table th:nth-child(1),
+table td:nth-child(1) { width: 32px; padding: 2px 4px; overflow: visible; }  /* delete button */
+table th:nth-child(2),
+table td:nth-child(2) { width: 140px; }  /* title */
+table th:nth-child(3),
+table td:nth-child(3) { width: 140px; }  /* url */
+table th:nth-child(4),
+table td:nth-child(4) { width: 80px; }   /* author */
+table th:nth-child(5),
+table td:nth-child(5) { width: 85px; }   /* link type */
+table th:nth-child(6),
+table td:nth-child(6) { width: 303px; }  /* annotation */
 
 th {
     background-color: #007bff;
     color: white;
     text-align: left;
     padding: 5px 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 td {
     padding: 5px 10px;
     border-bottom: 1px solid #dddddd;
+    overflow: hidden;
+}
+
+/* truncate long text in title/url/author cells */
+td:nth-child(2),
+td:nth-child(3),
+td:nth-child(4) {
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 tr:nth-child(even) {
@@ -226,7 +258,6 @@ tr:hover {
 /* Annotation Input */
 .annotation-input {
     width: 100%;
-    min-width: 150px;
     box-sizing: border-box;
     font-size: 0.85rem;
     padding: 3px 5px;
@@ -239,13 +270,10 @@ tr:hover {
 /* Layout */
 .wrapper {
     height: 100%;
-    width: 100%;
-    min-width: 600px;
-    overflow-y: hidden;
+    width: 800px;
     padding: 10px;
 }
 
 .metadata-table-wrapper {
     width: 100%;
-    display: inline-block;
 }

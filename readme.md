@@ -69,6 +69,13 @@ If you think that you come up with something that you want to share back, I'm mo
 ![FetchFox screenshot showing main popup with export options](/images/fetchfox-screenshot-2.jpg?raw=true "FetchFox screenshot showing main popup with export options")
 
 ### Changelog
+#### v0.5
+- Removes Publish Date column from metadata table view
+- Widens popup to 800px with fixed-width table layout — no horizontal scrolling
+- Title, URL, and Author cells truncate long text with ellipsis; hover shows full text as tooltip
+- Widens Annotation column for easier note-taking
+- Delete button fully visible with compact sizing
+
 #### v0.4
 - Adds annotation field — editable per-link note saved to storage
 - Adds WordPress block HTML export (group blocks with optional annotation paragraph)

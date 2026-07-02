@@ -154,22 +154,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Create and append title cell
                 const titleCell = document.createElement('td');
                 titleCell.textContent = meta.title || 'No title';
+                titleCell.title = meta.title || '';
                 row.appendChild(titleCell);
 
                 // Create and append URL cell
                 const urlCell = document.createElement('td');
                 urlCell.textContent = meta.url || 'No URL';
+                urlCell.title = meta.url || '';
                 row.appendChild(urlCell);
 
                 // Create and append author cell
                 const authorCell = document.createElement('td');
                 authorCell.textContent = meta.author || 'No author';
+                authorCell.title = meta.author || '';
                 row.appendChild(authorCell);
-
-                // Create and append publish date cell
-                const publishDateCell = document.createElement('td');
-                publishDateCell.textContent = formatDate(meta.published) || 'No publish date';
-                row.appendChild(publishDateCell);
 
                 // Create and append link type cell with dropdown
                 const linkTypeCell = document.createElement('td');
