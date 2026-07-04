@@ -69,6 +69,10 @@ If you think that you come up with something that you want to share back, I'm mo
 ![FetchFox screenshot showing main popup with export options](/images/fetchfox-screenshot-2.jpg?raw=true "FetchFox screenshot showing main popup with export options")
 
 ### Changelog
+#### v0.5.1
+- Moves action buttons to the right side of the popup
+- Reorders buttons left-to-right: Export Data, View Saved Metadata, Save Metadata
+
 #### v0.5
 - Removes Publish Date column from metadata table view
 - Widens popup to 800px with fixed-width table layout — no horizontal scrolling
