@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "web-ext run --source-dir .",
-    "build": "web-ext build --source-dir . --artifacts-dir dist --ignore-files 'dist/' 'node_modules/' 'images/' '*.zip' '*.md'"
+    "build": "web-ext build --artifacts-dir dist --filename 'fetchfox-{version}.zip' --overwrite-dest"
   },
   "devDependencies": {
     "web-ext": "*"
