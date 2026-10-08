@@ -17,6 +17,9 @@ Right now I'm developing this browser extension for Firefox, and will try replic
 - Clone the repo and run `npm install`
 - Run `npm run dev` — opens Firefox with the extension loaded and reloads on file changes
 
+**Build a signed-ready package:**
+- Run `npm run build` — writes a zip to `dist/` for upload to addons.mozilla.org
+
 **Manual load:**
 - Download the files and unzip them
 - Open a new tab in Firefox and go to `about:debugging#/runtime/this-firefox` in your address bar
@@ -69,6 +72,14 @@ If you think that you come up with something that you want to share back, I'm mo
 ![FetchFox screenshot showing main popup with export options](/images/fetchfox-screenshot-2.jpg?raw=true "FetchFox screenshot showing main popup with export options")
 
 ### Changelog
+#### v0.6.0
+- Fixes stale metadata on single page apps — saving a second video, track, or episode in the same tab no longer saves the first one's details
+- Reads title, author, description, URL, image, and media fields from the live page on YouTube, Spotify, Apple Podcasts/Music, and Pocket Casts
+- Adds a general fallback for unlisted single page apps: prefers the live document title when the meta title no longer matches it
+- Clicking "Save Metadata" now jumps to the saved metadata view and scrolls to the new row, which flashes to confirm the save
+- Title, URL, author, and annotation cells show two lines instead of one; hover still shows the full value
+- Strips `http://`, `https://`, `www.`, and trailing slashes from URLs shown in the table — saved links and exports keep the full URL
+
 #### v0.5.1
 - Moves action buttons to the right side of the popup
 - Reorders buttons left-to-right: Export Data, View Saved Metadata, Save Metadata

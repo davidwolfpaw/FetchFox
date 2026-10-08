@@ -37,9 +37,22 @@ document.addEventListener('DOMContentLoaded', function () {
     function saveMetadata() {
         browser.runtime.sendMessage({ action: "saveMetadata" }).then(response => {
             showMessage(response.message, response.success ? "success" : "error");
+            if (response.success) {
+                // Show the saved metadata and reveal the newly added row
+                return buildTable().then(revealLastRow);
+            }
         }).catch(error => {
             showMessage("Error: " + error, "error");
         });
+    }
+
+    // Scroll the most recently saved row into view and flash it
+    function revealLastRow() {
+        const lastRow = metadataBody.lastElementChild;
+        if (!lastRow) return;
+        lastRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        lastRow.classList.add('just-saved');
+        setTimeout(() => lastRow.classList.remove('just-saved'), 2000);
     }
 
     // Function to display a temporary message
@@ -132,9 +145,30 @@ document.addEventListener('DOMContentLoaded', function () {
         downloadAnchorNode.remove();
     }
 
+    // Build a table cell whose text wraps to two lines before being clipped
+    // displayValue, when given, is shown instead of value (tooltip keeps value)
+    function createTextCell(value, fallback, displayValue) {
+        const cell = document.createElement('td');
+        const clamp = document.createElement('div');
+        clamp.classList.add('clamp-two-lines');
+        clamp.textContent = (displayValue !== undefined ? displayValue : value) || fallback;
+        cell.title = value || '';
+        cell.appendChild(clamp);
+        return cell;
+    }
+
+    // Strip scheme, www-style subdomain and trailing slash for display only
+    function tidyUrlForDisplay(url) {
+        if (!url) return '';
+        return String(url)
+            .replace(/^[a-z][a-z0-9+.-]*:\/\//i, '')
+            .replace(/^www\d*\./i, '')
+            .replace(/\/+$/, '');
+    }
+
     // Function to build the metadata table
     function buildTable() {
-        browser.storage.local.get('allMetadata').then(data => {
+        return browser.storage.local.get('allMetadata').then(data => {
             const metadata = data.allMetadata || [];
             // Clear existing table rows
             metadataBody.innerHTML = '';
@@ -151,23 +185,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 deleteCell.appendChild(deleteButton);
                 row.appendChild(deleteCell);
 
-                // Create and append title cell
-                const titleCell = document.createElement('td');
-                titleCell.textContent = meta.title || 'No title';
-                titleCell.title = meta.title || '';
-                row.appendChild(titleCell);
-
-                // Create and append URL cell
-                const urlCell = document.createElement('td');
-                urlCell.textContent = meta.url || 'No URL';
-                urlCell.title = meta.url || '';
-                row.appendChild(urlCell);
-
-                // Create and append author cell
-                const authorCell = document.createElement('td');
-                authorCell.textContent = meta.author || 'No author';
-                authorCell.title = meta.author || '';
-                row.appendChild(authorCell);
+                // Create and append title, URL and author cells
+                row.appendChild(createTextCell(meta.title, 'No title'));
+                row.appendChild(createTextCell(meta.url, 'No URL', tidyUrlForDisplay(meta.url)));
+                row.appendChild(createTextCell(meta.author, 'No author'));
 
                 // Create and append link type cell with dropdown
                 const linkTypeCell = document.createElement('td');

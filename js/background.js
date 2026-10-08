@@ -67,6 +67,175 @@ function extractMetadata() {
     };
 
 
+    // Several media sites are single page apps: after an in-page navigation
+    // their meta tags, JSON-LD and microdata can still describe the previously
+    // viewed item. For those sites the affected fields are read from the live
+    // DOM and the address bar instead.
+    const siteOverrides = (() => {
+        let address;
+        try {
+            address = new URL(window.location.href);
+        } catch (e) {
+            return null;
+        }
+        const host = address.hostname;
+        const path = address.pathname;
+        const isHost = (domain) => host === domain || host.endsWith('.' + domain);
+
+        // Read the first non-empty text the app has rendered
+        const liveText = (selectors) => {
+            for (const selector of selectors) {
+                const element = document.querySelector(selector);
+                const text = element && (element.textContent || '').trim();
+                if (text) return sanitizeString(text);
+            }
+            return '';
+        };
+
+        // Read an attribute from a node the app re-renders per item
+        const liveAttr = (selector, attribute) => {
+            const element = document.querySelector(selector);
+            if (!element) return '';
+            return sanitizeString(element.getAttribute(attribute) || '');
+        };
+
+        // document.title tracks in-page navigation on every SPA router
+        const docTitle = (suffix) => sanitizeString((document.title || '').replace(suffix, '').trim());
+
+        if (isHost('youtube.com')) {
+            let videoId = null;
+            if (path === '/watch') {
+                videoId = address.searchParams.get('v');
+            } else if (path.startsWith('/shorts/')) {
+                videoId = path.split('/')[2] || null;
+            }
+            if (!videoId) return null;
+            return {
+                url: () => 'https://www.youtube.com/watch?v=' + videoId,
+                title: () => liveText([
+                    'ytd-watch-metadata #title h1 yt-formatted-string',
+                    'ytd-watch-metadata #title h1',
+                    'h1.ytd-watch-metadata',
+                    '#above-the-fold #title',
+                    'ytd-reel-player-header-renderer h2'
+                ]) || docTitle(/\s*-\s*YouTube$/),
+                author: () => liveText([
+                    'ytd-watch-metadata ytd-channel-name a',
+                    '#owner ytd-channel-name a',
+                    '#upload-info ytd-channel-name a',
+                    'ytd-reel-player-header-renderer ytd-channel-name a'
+                ]),
+                description: () => liveText([
+                    '#description-inline-expander yt-attributed-string',
+                    '#description-inline-expander'
+                ]),
+                published: () => liveAttr('ytd-player-microformat-renderer meta[itemprop="uploadDate"]', 'content'),
+                image: () => 'https://i.ytimg.com/vi/' + videoId + '/maxresdefault.jpg',
+                video: () => 'https://www.youtube.com/embed/' + videoId
+            };
+        }
+
+        if (isHost('open.spotify.com')) {
+            const route = path.match(/^\/(?:intl-[a-z-]+\/)?(track|episode|show|album|playlist|artist|audiobook)\/([A-Za-z0-9]+)/);
+            if (!route) return null;
+            const kind = route[1];
+            const id = route[2];
+            const isAudio = kind === 'track' || kind === 'album' || kind === 'episode';
+            return {
+                // Drop the ?si= share token, which also goes stale
+                url: () => 'https://open.spotify.com/' + kind + '/' + id,
+                title: () => liveText([
+                    '[data-testid="entityTitle"] h1',
+                    '[data-testid="episode-title"]',
+                    'main h1'
+                ]) || docTitle(/\s*[|–-]\s*Spotify\s*$/),
+                author: () => liveText([
+                    '[data-testid="creator-link"]',
+                    '[data-testid="entity-subtitle"] a',
+                    'main a[href^="/show/"]',
+                    'main a[href^="/artist/"]'
+                ]),
+                description: () => liveText([
+                    '[data-testid="episode-description"]',
+                    '[data-testid="entity-description"]'
+                ]),
+                image: () => liveAttr('[data-testid="entity-header-image"] img, main img[src*="scdn.co"]', 'src'),
+                video: () => '',
+                audio: () => (isAudio ? 'https://open.spotify.com/' + kind + '/' + id : '')
+            };
+        }
+
+        if (isHost('podcasts.apple.com') || isHost('music.apple.com')) {
+            // The episode or track lives in the ?i= parameter, so it is kept
+            const itemId = address.searchParams.get('i');
+            return {
+                url: () => address.origin + path + (itemId ? '?i=' + itemId : ''),
+                title: () => liveText([
+                    '[data-testid="non-editable-product-title"]',
+                    '.headings__title',
+                    '.product-header__title',
+                    'main h1'
+                ]) || docTitle(/\s*[|–-]\s*Apple (Podcasts|Music)\s*$/),
+                author: () => liveText([
+                    '[data-testid="product-creator"] a',
+                    '.headings__subtitles',
+                    '.product-header__identity a',
+                    'main a[href*="/podcast/"]',
+                    'main a[href*="/artist/"]'
+                ]),
+                description: () => liveText([
+                    '[data-testid="episode-description"]',
+                    '.product-hero-desc',
+                    '.section__description'
+                ]),
+                image: () => liveAttr('main picture img, .artwork img, main img[src*="mzstatic.com"]', 'src'),
+                video: () => ''
+            };
+        }
+
+        if (isHost('pocketcasts.com')) {
+            return {
+                title: () => liveText([
+                    '.episode-title',
+                    '.podcast_title',
+                    'main h1'
+                ]),
+                author: () => liveText([
+                    'div[class="desc"]',
+                    '.podcast-title',
+                    '.author'
+                ]),
+                description: () => liveText([
+                    '.episode-show-notes',
+                    '.show-notes'
+                ]),
+                video: () => ''
+            };
+        }
+
+        return null;
+    })();
+
+    // Use the site specific reader whenever the site has one, even when it
+    // comes back empty, so that a stale meta tag can never win on these sites
+    const overrideOr = (field, fallback) => {
+        if (!siteOverrides || !siteOverrides[field]) return null;
+        return siteOverrides[field]() || fallback;
+    };
+
+    // True when two titles share a word of four or more characters. Used to
+    // spot stale meta tags on single page apps that are not listed above.
+    const sharesWord = (first, second) => {
+        const words = (text) => new Set(String(text).toLowerCase().match(/[a-z0-9]{4,}/g) || []);
+        const firstWords = words(first);
+        const secondWords = words(second);
+        if (!firstWords.size || !secondWords.size) return true;
+        for (const word of secondWords) {
+            if (firstWords.has(word)) return true;
+        }
+        return false;
+    };
+
     // Helper function to parse JSON-LD data
     const parseJsonLd = () => {
         const scriptElements = document.querySelectorAll('script[type="application/ld+json"]');
@@ -86,20 +255,32 @@ function extractMetadata() {
     // Object defining the metadata rules with JSON-LD data, followed by selectors
     const metadataRules = {
         title: () => {
+            const override = overrideOr('title', 'No title');
+            if (override) return override;
             const jsonLd = parseJsonLd();
             if (jsonLd && jsonLd.name) {
                 return sanitizeString(jsonLd.name);
             }
-            return findContentBySelectors([
+            const metaTitle = findContentBySelectors([
                 'meta[property="og:title"]', 'meta[name="og:title"]',
                 'meta[property="twitter:title"]', 'meta[name="twitter:title"]',
                 'meta[property="parsely-title"]', 'meta[name="parsely-title"]',
                 'meta[name="apple:title"]',
                 'title', 'h1'
             ], 'No title');
+            // Last resort check for an unlisted single page app: document.title
+            // follows in-page navigation, so a meta title with nothing in common
+            // with it is most likely left over from an earlier page
+            const liveTitle = sanitizeString((document.title || '').trim());
+            if (liveTitle && metaTitle !== 'No title' && !sharesWord(metaTitle, liveTitle)) {
+                return liveTitle;
+            }
+            return metaTitle;
         },
 
         description: () => {
+            const override = overrideOr('description', 'No description');
+            if (override) return override;
             const jsonLd = parseJsonLd();
             if (jsonLd && jsonLd.description) {
                 return sanitizeString(jsonLd.description);
@@ -113,6 +294,8 @@ function extractMetadata() {
         },
 
         url: () => {
+            const override = overrideOr('url', window.location.href);
+            if (override) return override;
             const jsonLd = parseJsonLd();
             if (jsonLd && jsonLd.url) {
                 return sanitizeString(jsonLd.url);
@@ -132,6 +315,8 @@ function extractMetadata() {
         },
 
         author: () => {
+            const override = overrideOr('author', 'No author');
+            if (override) return override;
             const jsonLd = parseJsonLd();
             const hostname = window.location.hostname;
             if (jsonLd && jsonLd.author && jsonLd.author.name) {
@@ -140,16 +325,6 @@ function extractMetadata() {
             if (hostname.includes('podcasts.apple.com')) {
                 if (jsonLd && jsonLd.partOfSeries && jsonLd.partOfSeries.name) {
                     return sanitizeString(jsonLd.partOfSeries.name);
-                }
-            }
-            if (hostname.includes('youtube.com')) {
-                const youtubeAuthor = document.querySelector('link[itemprop="name"]');
-                if (youtubeAuthor) {
-                    return sanitizeString(youtubeAuthor.getAttribute('content') || youtubeAuthor.textContent);
-                }
-                const youtubeChannelName = document.querySelector('#upload-info ytd-channel-name a');
-                if (youtubeChannelName) {
-                    return sanitizeString(youtubeChannelName.textContent);
                 }
             }
             if (hostname.includes('pocketcasts.com')) {
@@ -238,6 +413,8 @@ function extractMetadata() {
         },
 
         published: () => {
+            const override = overrideOr('published', 'No publish date');
+            if (override) return override;
             const jsonLd = parseJsonLd();
             if (jsonLd && jsonLd.uploadDate) {
                 return sanitizeString(jsonLd.uploadDate);
@@ -282,6 +459,8 @@ function extractMetadata() {
         },
 
         image: () => {
+            const override = overrideOr('image', 'No image');
+            if (override) return override;
             const jsonLd = parseJsonLd();
             if (jsonLd && jsonLd.thumbnailUrl) {
                 return Array.isArray(jsonLd.thumbnailUrl) ? jsonLd.thumbnailUrl[0] : sanitizeString(jsonLd.thumbnailUrl);
@@ -296,6 +475,8 @@ function extractMetadata() {
         },
 
         video: () => {
+            const override = overrideOr('video', 'No video');
+            if (override) return override;
             const jsonLd = parseJsonLd();
             if (jsonLd && jsonLd.embedUrl) {
                 return sanitizeString(jsonLd.embedUrl);
@@ -308,6 +489,8 @@ function extractMetadata() {
         },
 
         audio: () => {
+            const override = overrideOr('audio', 'No audio');
+            if (override) return override;
             const jsonLd = parseJsonLd();
             if (jsonLd && jsonLd.audio) {
                 return sanitizeString(jsonLd.audio);
