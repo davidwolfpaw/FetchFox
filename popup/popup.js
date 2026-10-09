@@ -145,16 +145,96 @@ document.addEventListener('DOMContentLoaded', function () {
         downloadAnchorNode.remove();
     }
 
-    // Build a table cell whose text wraps to two lines before being clipped
-    // displayValue, when given, is shown instead of value (tooltip keeps value)
-    function createTextCell(value, fallback, displayValue) {
+    // Build an editable table cell whose text wraps to two lines before being clipped
+    // options.display formats the stored value for display only (editing shows the raw value)
+    // options.normalize cleans up the typed value before it is stored
+    function createEditableCell(meta, field, index, placeholder, options = {}) {
+        const { display, normalize } = options;
         const cell = document.createElement('td');
-        const clamp = document.createElement('div');
-        clamp.classList.add('clamp-two-lines');
-        clamp.textContent = (displayValue !== undefined ? displayValue : value) || fallback;
-        cell.title = value || '';
-        cell.appendChild(clamp);
+        const editor = document.createElement('div');
+        editor.classList.add('clamp-two-lines', 'editable-cell');
+        editor.contentEditable = 'true';
+        editor.spellcheck = false;
+        editor.dataset.placeholder = placeholder;
+        editor.dataset.raw = meta[field] || '';
+        editor.title = 'Click to edit';
+
+        const render = () => {
+            const raw = editor.dataset.raw;
+            editor.textContent = display ? display(raw) : raw;
+            cell.title = raw;
+        };
+        render();
+
+        // Keep row dragging from stealing the click that places the caret
+        editor.addEventListener('mousedown', (e) => e.stopPropagation());
+        editor.addEventListener('dragstart', (e) => e.stopPropagation());
+
+        // Show the untruncated, unformatted value while editing
+        editor.addEventListener('focus', () => {
+            const row = editor.closest('tr');
+            if (row) row.setAttribute('draggable', false);
+            editor.textContent = editor.dataset.raw;
+        });
+
+        editor.addEventListener('blur', () => {
+            const row = editor.closest('tr');
+            if (row) row.setAttribute('draggable', true);
+            let next = editor.textContent.replace(/\s+/g, ' ').trim();
+            if (normalize) next = normalize(next);
+            if (next === editor.dataset.raw) {
+                render();
+                return;
+            }
+            editor.dataset.raw = next;
+            render();
+            updateField(index, field, next).then(() => flashSaved(editor));
+        });
+
+        // Paste as plain text so markup from the clipboard never lands in the cell
+        editor.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+            document.execCommand('insertText', false, text.replace(/\s+/g, ' '));
+        });
+
+        editor.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                editor.blur();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                editor.textContent = editor.dataset.raw;
+                editor.blur();
+            }
+        });
+
+        cell.appendChild(editor);
         return cell;
+    }
+
+    // Briefly highlight a field that was just written to storage
+    function flashSaved(element) {
+        element.classList.add('cell-saved');
+        setTimeout(() => element.classList.remove('cell-saved'), 1000);
+    }
+
+    // Write a single field of one metadata entry back to storage
+    function updateField(index, field, value) {
+        return browser.storage.local.get('allMetadata').then(data => {
+            const metadata = data.allMetadata || [];
+            if (!metadata[index]) return;
+            metadata[index][field] = value;
+            return browser.storage.local.set({ 'allMetadata': metadata });
+        }).catch(error => {
+            showMessage('Error saving ' + field + ': ' + error, 'error');
+        });
+    }
+
+    // A hand-typed URL usually omits the scheme; exports need an absolute one
+    function addMissingScheme(url) {
+        if (!url) return '';
+        return /^[a-z][a-z0-9+.-]*:/i.test(url) ? url : 'https://' + url;
     }
 
     // Strip scheme, www-style subdomain and trailing slash for display only
@@ -185,10 +265,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 deleteCell.appendChild(deleteButton);
                 row.appendChild(deleteCell);
 
-                // Create and append title, URL and author cells
-                row.appendChild(createTextCell(meta.title, 'No title'));
-                row.appendChild(createTextCell(meta.url, 'No URL', tidyUrlForDisplay(meta.url)));
-                row.appendChild(createTextCell(meta.author, 'No author'));
+                // Create and append editable title, URL and author cells
+                row.appendChild(createEditableCell(meta, 'title', index, 'No title'));
+                row.appendChild(createEditableCell(meta, 'url', index, 'No URL', {
+                    display: tidyUrlForDisplay,
+                    normalize: addMissingScheme
+                }));
+                row.appendChild(createEditableCell(meta, 'author', index, 'No author'));
 
                 // Create and append link type cell with dropdown
                 const linkTypeCell = document.createElement('td');
@@ -285,16 +368,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to update the annotation
     function updateAnnotation(event, index) {
-        const newAnnotation = event.target.value;
-        browser.storage.local.get('allMetadata').then(data => {
-            let metadata = data.allMetadata || [];
-            if (metadata[index]) {
-                metadata[index].annotation = newAnnotation;
-                browser.storage.local.set({ 'allMetadata': metadata });
-            }
-        }).catch(error => {
-            alert('Error updating annotation: ' + error);
-        });
+        const input = event.target;
+        updateField(index, 'annotation', input.value).then(() => flashSaved(input));
     }
 
     // Function to export metadata as WordPress block HTML

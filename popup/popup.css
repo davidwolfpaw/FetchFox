@@ -260,6 +260,46 @@ td:nth-child(4) {
     min-height: calc(2 * 1.35em);
 }
 
+/* Editable title/url/author cells */
+.editable-cell {
+    /* override the row's drag-friendly user-select so text can be selected */
+    -moz-user-select: text;
+    -webkit-user-select: text;
+    user-select: text;
+    cursor: text;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 2px 4px;
+    margin: -2px -4px;
+}
+
+.editable-cell:hover {
+    border-color: #ccc;
+    background-color: #fff;
+}
+
+.editable-cell:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    background-color: #fff;
+    /* un-clamp while editing so the whole value is reachable */
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    max-height: 6em;
+    overflow: auto;
+}
+
+.editable-cell:empty::before {
+    content: attr(data-placeholder);
+    color: #888;
+}
+
+.cell-saved {
+    animation: justSavedFlash 1s ease-out forwards;
+}
+
 tr:nth-child(even) {
     background-color: #f2f2f2;
 }
