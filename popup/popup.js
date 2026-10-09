@@ -107,6 +107,45 @@ document.addEventListener('DOMContentLoaded', function () {
         downloadAnchorNode.remove();
     }
 
+    // Hosts whose provider name only repeats what the URL already makes obvious
+    const redundantProviderHosts = /(^|\.)(youtube\.com|youtu\.be|youtube-nocookie\.com)$/i;
+
+    // Decide whether an entry's provider is worth printing
+    function hasUsefulProvider(meta) {
+        if (!meta.provider || /^no provider/i.test(meta.provider)) return false;
+        try {
+            return !redundantProviderHosts.test(new URL(meta.url).hostname);
+        } catch (error) {
+            return true;
+        }
+    }
+
+    // Remove a placeholder from a template along with the separator joining it to its neighbour
+    function dropPlaceholder(template, field) {
+        const placeholder = `\\[${field}\\]`;
+        const separator = '\\s*[,;:·|–—-]\\s*';
+        return template
+            .replace(new RegExp(separator + placeholder, 'g'), '')
+            .replace(new RegExp(placeholder + separator, 'g'), '')
+            .replace(new RegExp(placeholder, 'g'), '');
+    }
+
+    // Fill a template's [field] placeholders from one metadata entry
+    // A placeholder with nothing to show takes its separator with it, so the line reads
+    // the same whether or not the field was scraped
+    function renderTemplate(template, meta) {
+        let filled = template;
+        if (!hasUsefulProvider(meta)) {
+            filled = dropPlaceholder(filled, 'provider');
+        }
+        const fields = filled.match(/\[([a-z]+)\]/gi) || [];
+        fields.forEach(placeholder => {
+            const field = placeholder.slice(1, -1);
+            if (!meta[field]) filled = dropPlaceholder(filled, field);
+        });
+        return filled.replace(/\[([a-z]+)\]/gi, (match, field) => meta[field] || '');
+    }
+
     // Function to export metadata as Markdown
     function exportMarkdown() {
         const template = templateTextArea.value.trim() || defaultTemplate;
@@ -115,16 +154,8 @@ document.addEventListener('DOMContentLoaded', function () {
             let markdownContent = '';
 
             metadata.forEach(meta => {
-                let line = template;
-                for (const key in meta) {
-                    if (meta.hasOwnProperty(key)) {
-                        const regex = new RegExp(`\\[${key}\\]`, 'g');
-                        line = line.replace(regex, meta[key] || '');
-                    }
-                }
-                // Remove unreplaced placeholders (e.g. [annotation] when unset) — single lowercase word only
-                line = line.replace(/\[[a-z]+\]/g, '');
-                line = line.split('\n').filter(l => l.trim() !== '').join('\n');
+                const line = renderTemplate(template, meta)
+                    .split('\n').filter(l => l.trim() !== '').join('\n');
                 markdownContent += line + '\n';
             });
 
@@ -382,13 +413,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let blocks = '';
 
             metadata.forEach(meta => {
-                let linkText = linkTemplate;
-                for (const key in meta) {
-                    if (meta.hasOwnProperty(key)) {
-                        const regex = new RegExp(`\\[${key}\\]`, 'g');
-                        linkText = linkText.replace(regex, meta[key] || '');
-                    }
-                }
+                const linkText = renderTemplate(linkTemplate, meta);
                 // Strip markdown link syntax: [[text]]([url]) → text with separate href
                 const mdLinkMatch = linkText.match(/^\[(.+)\]\((.+)\)$/);
                 let linkHtml;

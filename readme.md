@@ -39,6 +39,7 @@ Right now I'm developing this browser extension for Firefox, and will try replic
 - Click "Export Markdown" to get a markdown file of select metadata (annotation included in default template)
 - Click "Export HTML (WordPress)" to get WordPress block HTML — each link becomes a group block with an optional annotation paragraph
 - Use the input and shortcodes under the export buttons to customize the Markdown/HTML export format
+- A shortcode with nothing to show is dropped along with its separator, so a missing field leaves no stray punctuation behind. `[provider]` also counts as empty for YouTube links, where the provider name only repeats the URL
 
 #### Metadata collected:
 - title
