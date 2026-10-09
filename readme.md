@@ -73,6 +73,14 @@ If you think that you come up with something that you want to share back, I'm mo
 ![FetchFox screenshot showing main popup with export options](/images/fetchfox-screenshot-2.jpg?raw=true "FetchFox screenshot showing main popup with export options")
 
 ### Changelog
+#### v0.7.0
+- Title, URL, and author are editable directly in the saved metadata view — click a cell to fix a bad scrape, Enter to commit, Escape to revert
+- Edited fields flash green once saved; editing a cell shows the full stored value, so a truncated URL is still reachable
+- A URL typed without `http://` or `https://` gets a scheme on save, so hand-corrected links still export as working links
+- Drops `[provider]` from Markdown and WordPress exports for YouTube links, where the provider name only repeats the URL
+- Drops the `No provider specified` fallback from exports instead of printing it
+- An export shortcode with nothing to show now takes its separator with it, so a missing field leaves no stray punctuation
+
 #### v0.6.0
 - Fixes stale metadata on single page apps — saving a second video, track, or episode in the same tab no longer saves the first one's details
 - Reads title, author, description, URL, image, and media fields from the live page on YouTube, Spotify, Apple Podcasts/Music, and Pocket Casts
